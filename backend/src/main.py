@@ -2,12 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api import auth, checklists, analyze, regulations, dashboard
+from src.database import Base, engine
+from src.models import models  # noqa: F401 - ensure models are registered
 
 app = FastAPI(
     title="Kunja API",
     description="Cross-border compliance tool for Malawi ↔ Zambia",
     version="0.1.0",
 )
+
+# Create tables on startup (MVP - migrate to alembic later)
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,

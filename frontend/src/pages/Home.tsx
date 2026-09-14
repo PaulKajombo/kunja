@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom'
+
 function Home() {
+  const navigate = useNavigate()
+
   return (
     <div>
       <header>
@@ -37,10 +41,10 @@ function Home() {
         <h2>Get Started</h2>
         <p>Choose your direction:</p>
         <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-          <button className="btn">
+          <button className="btn" onClick={() => navigate('/checklists/new')}>
             🇲🇼 I'm Malawian → Expanding to Zambia
           </button>
-          <button className="btn">
+          <button className="btn" onClick={() => navigate('/checklists/new')}>
             🇿🇲 I'm Zambian → Expanding to Malawi
           </button>
         </div>

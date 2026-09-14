@@ -1,24 +1,24 @@
 # Kunja - Full Project Roadmap
 
 ## Vision
-Build the leading AI-powered compliance platform for businesses expanding in Africa, starting with Malawi and expanding across the continent.
+Build the leading AI-powered cross-border compliance platform for Africa, starting with **Malawi ↔ Zambia** and expanding across the continent.
 
 ---
 
 ## Phase 0: Pre-Development (Weeks 0-1)
 
 ### Activities
-- [ ] Market research and validation
-- [ ] Legal consultation for Malawi regulations
+- [x] Market research and validation (pivot: Malawi ↔ Zambia cross-border)
+- [ ] Legal consultation for Malawi AND Zambia regulations
 - [ ] Competitor analysis (ComplyAdvantage, RegTech solutions)
-- [ ] User interviews with Malawi SMEs
+- [ ] User interviews with Malawi & Zambia SMEs
 - [ ] Define MVP scope with stakeholders
 
 ### Deliverables
 - Market validation report
-- Legal requirements document
+- Legal requirements document (both countries)
 - Competitive analysis
-- User personas
+- User personas (Malawian→Zambia, Zambian→Malawi)
 - Finalized MVP scope
 
 ---
@@ -28,11 +28,11 @@ Build the leading AI-powered compliance platform for businesses expanding in Afr
 ### Goal: Set up project infrastructure and core architecture
 
 #### Week 2: Project Setup
-- [ ] Create GitHub repository structure
+- [x] Create GitHub repository structure
+- [x] Set up Docker development environment (docker-compose.yml)
+- [x] Set up frontend project (React + TypeScript + Vite)
+- [x] Set up backend project (FastAPI + Python 3.11)
 - [ ] Set up CI/CD pipeline (GitHub Actions)
-- [ ] Configure Docker development environment
-- [ ] Set up frontend project (React + TypeScript + Vite)
-- [ ] Set up backend project (FastAPI + Python 3.11)
 - [ ] Configure development tools (pre-commit, linters, formatters)
 
 #### Week 3: Database Design
