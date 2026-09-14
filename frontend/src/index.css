@@ -1,0 +1,89 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #1a6b3c;
+  --primary-light: #2a9d5c;
+  --secondary: #e63946;
+  --bg: #f8f9fa;
+  --text: #212529;
+  --card: #ffffff;
+  --border: #dee2e6;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  background: var(--primary);
+  color: white;
+  padding: 20px 0;
+  margin-bottom: 30px;
+  border-radius: 8px;
+}
+
+header h1 {
+  font-size: 2rem;
+}
+
+header p {
+  opacity: 0.9;
+  margin-top: 5px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn:hover {
+  background: var(--primary-light);
+}
+
+.country-flags {
+  display: flex;
+  gap: 20px;
+  font-size: 1.5rem;
+}
+
+.country-card {
+  flex: 1;
+  text-align: center;
+  padding: 20px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+}
+
+.country-card h3 {
+  margin-top: 10px;
+}
