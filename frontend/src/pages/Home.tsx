@@ -7,58 +7,66 @@ function Home() {
     <div>
       <header>
         <h1>🇿🇲 Kunja 🇲🇼</h1>
-        <p>Cross-border compliance for Malawi ↔ Zambia</p>
+        <p>Your guide to entering African markets</p>
       </header>
 
       <div className="card">
-        <h2>Welcome to Kunja</h2>
+        <h2>Plan → Prepare → Comply → Enter → Operate</h2>
         <p>
-          Kunja helps businesses establish themselves across the Malawi-Zambia border.
-          Whether you're a Malawian expanding into Zambia, or a Zambian coming to Malawi,
-          we make compliance simple.
+          Kunja maps your complete market-entry journey. Whether you're a Malawian
+          expanding into Zambia, or a Zambian coming to Malawi, we show you exactly
+          what to do, in what order, and help at every step.
         </p>
+      </div>
+
+      <div className="card" style={{ textAlign: 'center' }}>
+        <h2>Begin Your Journey</h2>
+        <p style={{ marginBottom: '15px' }}>
+          Tell us about your business and get a step-by-step roadmap.
+        </p>
+        <button className="btn" onClick={() => navigate('/journeys/new')} style={{ fontSize: '1.1rem', padding: '12px 30px' }}>
+          🗺️ Map My Market Entry →
+        </button>
       </div>
 
       <div className="country-flags">
         <div className="country-card">
           <span>🇲🇼</span>
-          <h3>Malawi</h3>
-          <p>Business registration, tax, employment, immigration</p>
+          <h3>From Malawi</h3>
+          <p>Company readiness, export permits, SADC trade</p>
         </div>
         <div className="country-card">
           <span>↔️</span>
           <h3>Cross-Border</h3>
-          <p>Work permits, SADC trade, double taxation</p>
+          <p>Certificates of origin, customs, product standards</p>
         </div>
         <div className="country-card">
           <span>🇿🇲</span>
-          <h3>Zambia</h3>
-          <p>Business registration, tax, employment, immigration</p>
+          <h3>Into Zambia</h3>
+          <p>PACRA registration, ZRA tax, permits, operations</p>
         </div>
       </div>
 
       <div className="card">
-        <h2>Get Started</h2>
-        <p>Choose your direction:</p>
-        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-          <button className="btn" onClick={() => navigate('/checklists/new')}>
-            🇲🇼 I'm Malawian → Expanding to Zambia
-          </button>
-          <button className="btn" onClick={() => navigate('/checklists/new')}>
-            🇿🇲 I'm Zambian → Expanding to Malawi
-          </button>
+        <h2>How It Works</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', marginTop: '15px' }}>
+          <div>
+            <h3 style={{ color: 'var(--primary)' }}>1. Tell us your plan</h3>
+            <p style={{ color: '#666' }}>Your country, industry, and how you want to enter the market</p>
+          </div>
+          <div>
+            <h3 style={{ color: 'var(--primary)' }}>2. We map the path</h3>
+            <p style={{ color: '#666' }}>Every step from preparation to ongoing compliance, in order</p>
+          </div>
+          <div>
+            <h3 style={{ color: 'var(--primary)' }}>3. Follow the roadmap</h3>
+            <p style={{ color: '#666' }}>Track progress, mark steps complete, see what's next</p>
+          </div>
+          <div>
+            <h3 style={{ color: 'var(--primary)' }}>4. Ask Kunja anything</h3>
+            <p style={{ color: '#666' }}>AI guidance on any step, using your actual journey context</p>
+          </div>
         </div>
-      </div>
-
-      <div className="card">
-        <h2>AI-Powered Analysis</h2>
-        <p>
-          Upload your business documents and our AI (powered by Ollama, running locally)
-          will analyze them for compliance issues across both countries.
-        </p>
-        <p style={{ marginTop: '10px', color: '#666' }}>
-          🔒 Your data stays on your machine - no external API calls
-        </p>
       </div>
     </div>
   )

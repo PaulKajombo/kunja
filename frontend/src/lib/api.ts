@@ -76,3 +76,67 @@ export interface Gap {
   critical: boolean
   resource?: string
 }
+
+// ─── Journey types ───────────────────────────
+
+export interface JourneyOptions {
+  countries: { key: string; name: string; flag: string }[]
+  industries: string[]
+  business_models: { key: string; label: string; description: string }[]
+}
+
+export interface JourneyStep {
+  id: number
+  step_number: number
+  title: string
+  slug: string
+  description: string | null
+  why_needed: string | null
+  authority: string | null
+  documents_needed: string[]
+  instructions: string | null
+  estimated_cost: string | null
+  estimated_timeline: string | null
+  official_source: string | null
+  status: string // not_started | in_progress | completed | skipped | blocked | needs_verification
+  user_notes: string | null
+  depends_on: number[]
+}
+
+export interface JourneyPhase {
+  id: number
+  phase_number: number
+  name: string
+  description: string
+  steps: JourneyStep[]
+}
+
+export interface JourneyProgress {
+  total_steps: number
+  completed_steps: number
+  in_progress_steps: number
+  blocked_steps: number
+  percentage: number
+  next_step_id: number | null
+  next_step_title: string | null
+}
+
+export interface Journey {
+  id: number
+  company_name: string
+  origin_country: string
+  target_country: string
+  industry: string
+  business_model: string
+  business_model_label: string
+  business_description: string | null
+  status: string
+  created_at: string | null
+  phases: JourneyPhase[]
+  progress: JourneyProgress
+}
+
+export interface AskResponse {
+  answer: string
+  step_id: number | null
+}

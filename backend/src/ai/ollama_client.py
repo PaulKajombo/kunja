@@ -127,3 +127,84 @@ async def check_ollama_health() -> bool:
             return response.status_code == 200
     except Exception:
         return False
+
+
+async def ask_about_journey(context: dict) -> str:
+    """
+    Answer a user's question about their market-entry journey using Ollama.
+
+    The context contains the user's journey profile, the specific step
+    (or whole journey), and their question. The AI explains requirements
+    in plain language and points to official sources.
+    """
+    # Build a readable text context from the structured data
+    journey = context.get("journey", {})
+    question = context.get("question", "")
+
+    context_lines = [
+        f"Company: {journey.get('company_name', 'N/A')}",
+        f"Route: {journey.get('origin_country', '?')} → {journey.get('target_country', '?')}",
+        f"Industry: {journey.get('industry', 'N/A')}",
+        f"Business model: {journey.get('business_model', 'N/A')}",
+    ]
+    if journey.get("business_description"):
+        context_lines.append(
+            f"Business description: {journey['business_description']}"
+        )
+
+    if "step" in context:
+        step = context["step"]
+        context_lines.append("\n--- CURRENT STEP ---")
+        context_lines.append(f"Phase: {step.get('phase', 'N/A')}")
+        context_lines.append(f"Step: {step.get('title', 'N/A')}")
+        context_lines.append(f"What it is: {step.get('description', '')}")
+        context_lines.append(f"Why needed: {step.get('why_needed', '')}")
+        if step.get("authority"):
+            context_lines.append(f"Responsible authority: {step['authority']}")
+        if step.get("documents_needed"):
+            context_lines.append(
+                f"Documents needed: {', '.join(step['documents_needed'])}"
+            )
+        if step.get("estimated_cost"):
+            context_lines.append(f"Estimated cost: {step['estimated_cost']}")
+        if step.get("estimated_timeline"):
+            context_lines.append(f"Estimated timeline: {step['estimated_timeline']}")
+        if step.get("official_source"):
+            context_lines.append(f"Official source: {step['official_source']}")
+        context_lines.append(f"Current status: {step.get('status', 'N/A')}")
+    elif "phases" in context:
+        context_lines.append("\n--- JOURNEY OVERVIEW ---")
+        for phase in context.get("phases", []):
+            steps_str = "; ".join(
+                f"{s['title']} ({s['status']})" for s in phase.get("steps", [])
+            )
+            context_lines.append(f"{phase.get('name', 'Phase')}: {steps_str}")
+
+    system_prompt = (
+        "You are Kunja, a friendly, expert guide helping businesses enter "
+        "Malawi and Zambian markets. You are embedded inside a market-entry "
+        "roadmap app. Answer the user's question clearly and helpfully using "
+        "the provided journey context. Always:\n"
+        "1. Answer directly in plain language — no jargon\n"
+        "2. Reference the specific step/requirement they're asking about\n"
+        "3. Mention official sources/authorities where relevant\n"
+        "4. Be practical and action-oriented — tell them what to do next\n"
+        "5. If the question is outside your knowledge, say so honestly and "
+        "recommend consulting the official authority\n"
+        "Keep answers under 250 words unless the question needs more detail. "
+        "Do NOT invent fees, timelines, or regulations that are not in the context."
+    )
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {
+            "role": "user",
+            "content": (
+                "JOURNEY CONTEXT:\n"
+                + "\n".join(context_lines)
+                + f"\n\nUSER QUESTION: {question}"
+            ),
+        },
+    ]
+
+    return await chat_completion(messages)
