@@ -108,6 +108,7 @@ def generate_journey(
     industry: str,
     business_model: str,
     business_description: str = None,
+    user_id: int | None = None,
 ) -> Journey:
     """
     Generate a complete Journey from the knowledge base.
@@ -126,6 +127,7 @@ def generate_journey(
 
     # Create the Journey record
     journey = Journey(
+        user_id=user_id,
         company_name=company_name,
         origin_country=origin_country,
         target_country=target_country,

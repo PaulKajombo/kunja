@@ -6,11 +6,12 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [journeys, setJourneys] = useState<Journey[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     api<{ journeys: Journey[]; total: number }>('/api/v1/journeys')
       .then((d) => setJourneys(d.journeys))
-      .catch(() => {})
+      .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
 
@@ -31,6 +32,14 @@ export default function Dashboard() {
 
       {loading ? (
         <div className="card text-center">Loading...</div>
+      ) : error ? (
+        <div className="card empty-state">
+          <h3>Couldn't load your journeys</h3>
+          <p className="mt-1 mb-2 text-sm text-muted">{error}</p>
+          <button className="btn" onClick={() => window.location.reload()}>
+            Try again
+          </button>
+        </div>
       ) : journeys.length === 0 ? (
         <div className="card empty-state">
           <h3>No journeys yet</h3>

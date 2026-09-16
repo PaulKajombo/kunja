@@ -103,8 +103,8 @@ export default function JourneyView() {
         body: JSON.stringify({ step_id: activeStep?.id ?? null, question: askQuestion }),
       })
       setAskAnswer(res.answer)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ask failed')
     } finally {
       setAsking(false)
     }

@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 
 const NAV_ITEMS = [
   { to: '/dashboard', icon: '📊', label: 'Dashboard' },
@@ -8,6 +9,14 @@ const NAV_ITEMS = [
 ]
 
 export default function Layout() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <div className="app-shell">
       {/* Desktop sidebar */}
@@ -28,6 +37,18 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+        <div className="sidebar-user">
+          <div className="sidebar-user-initial">
+            {(user?.full_name ?? 'U').charAt(0).toUpperCase()}
+          </div>
+          <div className="sidebar-user-meta">
+            <div className="sidebar-user-name">{user?.full_name ?? 'Signed in'}</div>
+            <div className="sidebar-user-country">{user?.country ?? 'Kunja user'}</div>
+          </div>
+          <button className="sidebar-logout" onClick={handleLogout} title="Sign out">
+            Logout
+          </button>
+        </div>
         <div className="sidebar-footer">
           Kunja &copy; 2026
         </div>

@@ -17,6 +17,8 @@ from typing import Optional
 from sqlalchemy.orm import Session, selectinload
 
 from src.database import get_db
+from src.models.models import User
+from src.services.auth_service import get_optional_user
 from src.core.journey_kb import (
     SUPPORTED_BUSINESS_MODELS,
     SUPPORTED_INDUSTRIES,
@@ -26,6 +28,7 @@ from src.core.journey_engine import (
     generate_journey,
     compute_journey_progress,
 )
+from src.services import ask_service
 from src.models.models import Journey, JourneyPhase, JourneyStep
 from src.ai import ollama_client
 
@@ -150,7 +153,11 @@ def get_options():
 
 
 @router.post("", status_code=201)
-def create_journey(data: JourneyCreate, db: Session = Depends(get_db)):
+def create_journey(
+    data: JourneyCreate,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
+):
     """Create a new market-entry journey."""
     # Validate countries
     if data.origin_country not in ("malawi", "zambia"):
@@ -177,6 +184,7 @@ def create_journey(data: JourneyCreate, db: Session = Depends(get_db)):
             industry=data.industry,
             business_model=data.business_model,
             business_description=data.business_description,
+            user_id=user.id if user else None,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -185,16 +193,14 @@ def create_journey(data: JourneyCreate, db: Session = Depends(get_db)):
 
 
 @router.get("")
-def list_journeys(db: Session = Depends(get_db)):
-    """List all journeys."""
-    journeys = (
-        db.query(Journey)
-        .options(
+def list_journeys(db: Session = Depends(get_db), user: User | None = Depends(get_optional_user)):
+    """List journeys. When authenticated, only the caller's journeys are returned."""
+    query = db.query(Journey)
+    if user is not None:
+        query = query.filter(Journey.user_id == user.id)
+    journeys = query.options(
             selectinload(Journey.phases).selectinload(JourneyPhase.steps)
-        )
-        .order_by(Journey.created_at.desc())
-        .all()
-    )
+        ).order_by(Journey.created_at.desc()).all()
     return {
         "journeys": [_serialize_journey(j) for j in journeys],
         "total": len(journeys),
@@ -279,6 +285,10 @@ def update_step(
                 }
                 if all(dep_statuses.get(d) == "completed" for d in deps):
                     s.status = "not_started"
+
+        # Auto-complete the journey when every step is done
+        if all_steps and all(s.status == "completed" for s in all_steps):
+            journey.status = "completed"
         db.commit()
 
     return _serialize_journey(_get_journey(db, journey_id))
@@ -295,85 +305,19 @@ async def ask_kunja(
     if not data.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")
 
-    # Build context from the journey
-    progress = compute_journey_progress(journey)
-
     if data.step_id is not None:
-        # Find the specific step
-        step = None
-        phase_name = None
-        for phase in journey.phases:
-            for s in phase.steps:
-                if s.id == data.step_id:
-                    step = s
-                    phase_name = phase.name
-                    break
-            if step:
-                break
-
-        if not step:
-            raise HTTPException(status_code=404, detail="Step not found")
-
-        context = {
-            "journey": {
-                "company_name": journey.company_name,
-                "origin_country": journey.origin_country,
-                "target_country": journey.target_country,
-                "industry": journey.industry,
-                "business_model": journey.business_model,
-                "business_description": journey.business_description,
-            },
-            "step": {
-                "title": step.title,
-                "phase": phase_name,
-                "description": step.description,
-                "why_needed": step.why_needed,
-                "authority": step.authority,
-                "documents_needed": step.documents_needed,
-                "instructions": step.instructions,
-                "estimated_cost": step.estimated_cost,
-                "estimated_timeline": step.estimated_timeline,
-                "official_source": step.official_source,
-                "status": step.status,
-            },
-            "question": data.question,
-        }
+        context = ask_service.build_step_context(journey, data.step_id, data.question)
     else:
-        # Whole-journey question context
-        phase_summaries = []
-        for phase in journey.phases:
-            steps_summary = [
-                {
-                    "title": s.title,
-                    "status": s.status,
-                }
-                for s in phase.steps
-            ]
-            phase_summaries.append(
-                {
-                    "name": phase.name,
-                    "steps": steps_summary,
-                }
-            )
-        context = {
-            "journey": {
-                "company_name": journey.company_name,
-                "origin_country": journey.origin_country,
-                "target_country": journey.target_country,
-                "industry": journey.industry,
-                "business_model": journey.business_model,
-                "business_description": journey.business_description,
-                "progress": progress,
-            },
-            "phases": phase_summaries,
-            "question": data.question,
-        }
+        progress = compute_journey_progress(journey)
+        context = ask_service.build_journey_context(journey, data.question, progress)
 
     try:
         answer = await ollama_client.ask_about_journey(context)
         return {"answer": answer, "step_id": data.step_id}
-    except Exception as e:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Could not reach Ollama. Make sure it's running. Error: {e}",
-        ) from e
+    except Exception:
+        # Grounded fallback: answer from the structured KB instead of a 503
+        return {
+            "answer": ask_service.grounded_fallback(context),
+            "step_id": data.step_id,
+            "mode": "kb",
+        }

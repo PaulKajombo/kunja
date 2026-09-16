@@ -51,10 +51,13 @@ export default function Assistant() {
           },
         ])
       }
-    } catch (err: any) {
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', text: `Sorry, I couldn't process that: ${err.message}` },
+        {
+          role: 'assistant',
+          text: `Sorry, I couldn't process that: ${err instanceof Error ? err.message : 'Unknown error'}`,
+        },
       ])
     } finally {
       setLoading(false)

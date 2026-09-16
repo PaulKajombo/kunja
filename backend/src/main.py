@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api import auth, checklists, analyze, regulations, dashboard, journeys
+from src.api import auth, checklists, analyze, regulations, dashboard, journeys, documents
 from src.database import Base, engine
 from src.models import models  # noqa: F401 - ensure models are registered
 
@@ -28,6 +28,7 @@ app.include_router(analyze.router, prefix="/api/v1/analyze", tags=["Document Ana
 app.include_router(regulations.router, prefix="/api/v1/regulations", tags=["Regulations"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
 app.include_router(journeys.router, prefix="/api/v1/journeys", tags=["Journeys"])
+app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
 
 
 @app.get("/")

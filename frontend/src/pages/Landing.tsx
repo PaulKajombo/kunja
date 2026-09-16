@@ -9,13 +9,22 @@ export default function Landing() {
       <section className="landing-hero">
         <nav className="landing-nav" style={{ position: 'absolute', top: 0, left: 0, right: 0 }}>
           <div className="landing-nav-brand" style={{ color: 'white' }}>Kunja</div>
-          <button
-            className="btn-ghost"
-            style={{ color: 'white' }}
-            onClick={() => navigate('/dashboard')}
-          >
-            Sign in
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              className="btn-ghost"
+              style={{ color: 'white' }}
+              onClick={() => navigate('/register')}
+            >
+              Create account
+            </button>
+            <button
+              className="btn-ghost"
+              style={{ color: 'white' }}
+              onClick={() => navigate('/login')}
+            >
+              Sign in
+            </button>
+          </div>
         </nav>
 
         <div className="landing-hero-content">

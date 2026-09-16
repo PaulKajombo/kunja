@@ -1,73 +1,55 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
-from datetime import datetime, timedelta
+"""
+Auth endpoints. Layering: router -> service -> repository.
 
-from src.config import settings
+    POST /api/v1/auth/register  -> create account (returns user)
+    POST /api/v1/auth/login     -> exchange credentials for a JWT
+    GET  /api/v1/auth/me        -> return the currently authenticated user
+"""
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from src.database import get_db
+from src.models.models import User
+from src.repositories.user_repository import UserRepository
+from src.schemas.auth import Token, UserLogin, UserOut, UserRegister
+from src.services.auth_service import (
+    create_access_token,
+    get_current_user,
+    hash_password,
+    verify_password,
+)
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class UserCreate(BaseModel):
-    email: str
-    password: str
-    full_name: str
-    country: str  # "Malawi" or "Zambia"
-
-
-class UserResponse(BaseModel):
-    id: int
-    email: str
-    full_name: str
-    country: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# In-memory user store for MVP (replace with DB later)
-users_db: dict[str, dict] = {}
-user_counter = 0
-
-
-@router.post("/register", response_model=UserResponse)
-def register(user: UserCreate):
-    global user_counter
-    if user.email in users_db:
+@router.post("/register", response_model=UserOut, status_code=201)
+def register(data: UserRegister, db: Session = Depends(get_db)):
+    """Create a new account."""
+    email = data.email.strip().lower()
+    if UserRepository.get_by_email(db, email):
         raise HTTPException(status_code=400, detail="Email already registered")
-    user_counter += 1
-    users_db[user.email] = {
-        "id": user_counter,
-        "email": user.email,
-        "password": user.password,  # TODO: hash in production
-        "full_name": user.full_name,
-        "country": user.country,
-        "created_at": datetime.now(),
-    }
-    return users_db[user.email]
+
+    hashed = hash_password(data.password)
+    return UserRepository.create(
+        db,
+        email=email,
+        hashed_password=hashed,
+        full_name=data.full_name.strip(),
+        country=data.country.strip() or "Malawi",
+    )
 
 
 @router.post("/login", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = users_db.get(form_data.username)
-    if not user or user["password"] != form_data.password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-        )
-    access_token = f"token-{user['id']}-{datetime.now().timestamp()}"
-    return {"access_token": access_token, "token_type": "bearer"}
+def login(data: UserLogin, db: Session = Depends(get_db)):
+    """Authenticate and return a signed JWT."""
+    user = UserRepository.get_by_email(db, data.email.strip().lower())
+    if not user or not verify_password(data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+    return {"access_token": create_access_token(user.id), "token_type": "bearer"}
 
 
-@router.get("/me")
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    # TODO: decode JWT token in production
-    return {"message": "Authenticated", "token": token}
+@router.get("/me", response_model=UserOut)
+def me(current_user: User = Depends(get_current_user)):
+    """Return the authenticated user's profile."""
+    return current_user

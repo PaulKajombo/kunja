@@ -73,8 +73,8 @@ export default function JourneyNew() {
         }),
       })
       navigate(`/journeys/${journey.id}`)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create journey')
       setCreating(false)
     }
   }
