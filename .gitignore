@@ -17,6 +17,7 @@ node_modules/
 .next/
 .nuxt/
 out/
+package-lock.json
 
 # Environment variables
 .env

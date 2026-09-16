@@ -1,24 +1,25 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import NewChecklist from './pages/NewChecklist'
-import ChecklistFlow from './pages/ChecklistFlow'
-import Results from './pages/Results'
-import NewJourney from './pages/NewJourney'
+import Layout from './components/Layout'
+import Landing from './pages/Landing'
+import Dashboard from './pages/Dashboard'
+import JourneyNew from './pages/JourneyNew'
 import JourneyView from './pages/JourneyView'
+import Documents from './pages/Documents'
+import Assistant from './pages/Assistant'
 
 function App() {
   return (
     <Router>
-      <div className="app-container">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/checklists/new" element={<NewChecklist />} />
-          <Route path="/checklists/:id" element={<ChecklistFlow />} />
-          <Route path="/checklists/:id/results" element={<Results />} />
-          <Route path="/journeys/new" element={<NewJourney />} />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/journeys/new" element={<JourneyNew />} />
           <Route path="/journeys/:id" element={<JourneyView />} />
-        </Routes>
-      </div>
+          <Route path="/documents" element={<Documents />} />
+          <Route path="/assistant" element={<Assistant />} />
+        </Route>
+      </Routes>
     </Router>
   )
 }
